@@ -23,12 +23,12 @@ annotation AndroidParcelable {}
  *  resources:
  * http://mobile.dzone.com/articles/using-android-parcel
  * http://blog.efftinge.de/2013/03/fun-with-active-annotations-my-little.html
- * http://probemonkey.wordpress.com/2011/05/21/annotations-with-varargs-parameters/ // currently not possible with xtend
+ * http://probemonkey.wordpress.com/2011/05/21/annotations-with-varargs-parameters/ // TODO wannahave: currently not possible with xtend
  */
 
 /**
  * 
- * Compatible with @Property and @JSONProperty
+ * Compatible with @Property and @JSONProperty and @Accessors
  * 
  */
  
@@ -195,7 +195,6 @@ class ParcelableProcessor extends AbstractClassProcessor
 		}
 		
 		val fields = clazz.declaredFields
-		val jsonPropertyFieldDeclared = fields.exists[f | f.simpleName.equalsIgnoreCase(JsonPropertyProcessor.jsonObjectFieldName) && f.type.name.equalsIgnoreCase('org.json.JSONObject')]
 		for (f : fields)
 		{
 			if (unsupportedAbstractTypesAndSuggestedTypes.keySet.contains(f.type.name))
@@ -259,7 +258,9 @@ class ParcelableProcessor extends AbstractClassProcessor
 						readFromParcel(in);
 					}catch(JSONException e)
 					{
-						// TODO do error handling
+						throw new RuntimeException(e);
+						// sneaky throw caveat: this will potentially crash your app
+						// TODO do error handling, if necessary
 						/*
 						if (BuildConfig.DEBUG)
 						{
