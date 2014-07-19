@@ -35,8 +35,8 @@ class SubModel implements Parcelable
 @AndroidParcelable
 class ModelRoot implements Parcelable
 {
-	@Property
-	JSONObject jsonObj
+//	@Property // name collision
+//	JSONObject jsonObj
 	
 	@JsonProperty
 	String a_str

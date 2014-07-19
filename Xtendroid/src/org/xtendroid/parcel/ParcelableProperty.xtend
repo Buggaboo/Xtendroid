@@ -148,9 +148,21 @@ class ParcelableProcessor extends AbstractClassProcessor
 		«ELSEIF "java.util.Date".equals(f.type.name)»
 			this.«f.simpleName» = new Date(in.readLong());
 		«ELSEIF "org.json.JSONObject".equals(f.type.name)»
-			this.«f.simpleName» = new JSONObject(in.readString());
+			try {
+				this.«f.simpleName» = new JSONObject(in.readString());
+			}catch (JSONException e)
+			{
+				// sneaky throw
+				throw new RuntimeException(e);
+			}
 		«ELSEIF "org.json.JSONArray".equals(f.type.name)»
-			this.«f.simpleName» = new JSONArray(in.readString());
+			try {
+				this.«f.simpleName» = new JSONArray(in.readString());
+			}catch (JSONException e)
+			{
+				// sneaky throw
+				throw new RuntimeException(e);
+			}
 		«ELSEIF f.type.name.endsWith('[]')»
 			«IF f.type.name.startsWith("java.util.Date")»
 				long[] «f.simpleName»LongArray = in.createLongArray();
