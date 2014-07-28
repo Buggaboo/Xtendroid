@@ -369,23 +369,41 @@ should seek to improve the JSON API call.
 Creating a JSON bean is done as in this example:
 
 ```xtend
-class NewsItem {
-	@JsonProperty String url
+class Author
+{
+	@JsonProperty List<Book> books
+	@JsonProperty String surname
+	// ...
+}
+
+class Book {
+	@JsonProperty('yyyy-MM-dd') Date published
 	@JsonProperty String title
 	@JsonProperty long id
-	@JsonProperty boolean published
+	@JsonProperty String[] themes
+	// ...
 }
 ```
 
 You can then load JSON into the bean as in this example:
 
 ```xtend
-var jsonResponse = '''{"url":"http://one.com", "title": "One", "id": 1, "published": true}'''
-var newsItem = new NewsItem(new JSONObject(jsonResponse))
-toast(newsItem.title) // JSON parsed here and cached for later use
+var jsonResponse = '''
+	{
+		"books" : [{
+			"published" : "1981-01-01",
+			"title" : "What I did on my summer holiday",
+			"id" : 111111,
+			"themes" : [ "horror", "fantasy" ]
+		}],
+		"surname" : "Bob Bobbin"
+	}
+'''
+var author = new Author(new JSONObject(jsonResponse))
+toast(author.books?.head.id) // JSON parsed here and cached for later use
 ```
 
-Currently, nested JSON beans are supported!
+Nested JSON beans are supported! Also, see ```@EnumProperty``` for generating enum types and String to enum type conversion methods.
 See the [JsonTest](https://github.com/tobykurien/Xtendroid/blob/master/XtendroidTest/XtendroidTestCasesTest/src/org/xtendroid/xtendroidtest/test/JsonTest.xtend)
 for more.
 
