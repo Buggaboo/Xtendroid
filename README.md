@@ -95,8 +95,7 @@ Here is an example of a Fragment:
 ```
 
 As an alternative to using individual ```@AndroidView``` annotations, you can bind all the controls in an 
-Activity layout file to the code automatically by using the @AndroidActivity annotation, as follows (this is 
-not currently supported in Fragments):
+Activity layout file to the code automatically by using the ```@AndroidActivity``` annotation, as follows:
 
 ```xtend
 @AndroidActivity(layout=R.layout.my_activity) class MyActivity {
@@ -108,14 +107,20 @@ not currently supported in Fragments):
 
 }
 
+@AndroidFragment(layout=R.layout.my_fragment) class MyFragment {
+
+	...
+
+}
+
 ```
 
-Here, you specify the layout resource using the ```@AndroidActivity``` annotation, and Xtendroid will automatically parse the layout file and create getters for all the controls within the layout. This will be immediately accessible in the IDE (you will see the controls in your outline view and code-complete list). It will also auto-generate the ```onCreate()``` method if it doesn't exist, extend from ```Activity``` class, and load the layout into the Activity. Finally, it will look for any method with the ```@OnCreate``` annotation, and call them within the ```onCreate()``` method once the controls are ready to be accessed.
+Here, you specify the layout resource using the ```@AndroidActivity``` annotation, and Xtendroid will automatically parse the layout file recursively (it parses ```<include layout="R.layout.nested" />```) and create getters for all the controls within the layout. This will be immediately accessible in the IDE (you will see the controls in your outline view and code-complete list). It will also auto-generate the ```onCreate()``` method if it doesn't exist, extend from ```Activity``` class, and load the layout into the Activity. Finally, it will look for any method with the ```@OnCreate``` annotation, and call them within the ```onCreate()``` method once the controls are ready to be accessed.
 
 View this video of how this works and how well it integrates with the IDE: http://vimeo.com/77024959
 
 
-Background tasks using AsyncTask
+Background tasks using AsyncTask and AsyncTaskLoader
 --------------------------------
 
 Do you find the AsyncTask boilerplate code too messy? Try the BgTask class:
@@ -129,6 +134,8 @@ new BgTask<String>.runInBg([|
    toast("Got back: " + result) // note how toast() works here too!
 ])
 ```
+
+also try out the BgLoader class and the ```@AndroidLoader``` annotation. // TODO
 
 ProgressDialog is also handled automatically when using this syntax:
 
@@ -224,6 +231,8 @@ class User {
   @Property Bitmap avatar
 }
 ```
+
+also check out ```@AndroidAdapter, @CustomView, @CustomViewGroup```... // TODO
 
 The Activity:
 ```xtend
@@ -360,26 +369,48 @@ should seek to improve the JSON API call.
 Creating a JSON bean is done as in this example:
 
 ```xtend
-class NewsItem {
-	@JsonProperty String url
+class Author
+{
+	@JsonProperty List<Book> books
+	@JsonProperty String surname
+	// ...
+}
+
+class Book {
+	@JsonProperty('yyyy-MM-dd') Date published
 	@JsonProperty String title
 	@JsonProperty long id
-	@JsonProperty boolean published
+	@JsonProperty String[] themes
+	// ...
 }
 ```
 
 You can then load JSON into the bean as in this example:
 
 ```xtend
-var jsonResponse = '''{"url":"http://one.com", "title": "One", "id": 1, "published": true}'''
-var newsItem = new NewsItem(new JSONObject(jsonResponse))
-toast(newsItem.title) // JSON parsed here and cached for later use
+var jsonResponse = '''
+	{
+		"books" : [{
+			"published" : "1981-01-01",
+			"title" : "What I did on my summer holiday",
+			"id" : 111111,
+			"themes" : [ "horror", "fantasy" ]
+		}],
+		"surname" : "Bob Bobbin"
+	}
+'''
+var author = new Author(new JSONObject(jsonResponse))
+toast(author.books?.head.id) // JSON parsed here and cached for later use
 ```
 
-Currently, nested JSON beans are not yet supported, although you can declare
-```@JsonProperty JSONObject user`` for example. See the 
-[JsonTest](https://github.com/tobykurien/Xtendroid/blob/master/XtendroidTest/XtendroidTestCasesTest/src/org/xtendroid/xtendroidtest/test/JsonTest.xtend)
+Nested JSON beans are supported! Also, see ```@EnumProperty``` for generating enum types and String to enum type conversion methods.
+See the [JsonTest](https://github.com/tobykurien/Xtendroid/blob/master/XtendroidTest/XtendroidTestCasesTest/src/org/xtendroid/xtendroidtest/test/JsonTest.xtend)
 for more.
+
+Parcelables
+-----------
+
+// TODO ```@AndroidParcelable```
 
 
 Utilities
