@@ -38,11 +38,11 @@ android {
       resources.srcDirs += ['src']
       aidl.srcDirs = ['src']
     }
-
+/*
     dataBinding {
       enabled = true
     }
-
+*/
     compileOptions {
       sourceCompatibility JavaVersion.VERSION_1_7
       targetCompatibility JavaVersion.VERSION_1_7
