@@ -16,4 +16,5 @@ dependencies {
   compile ':HelloWorld'
   compile ':HandlerExample'
   compile ':MovieSearchApp'
+  compile ':Quotes'
 }
