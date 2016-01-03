@@ -6,9 +6,6 @@ buildscript {scriptHandler->
       classpath(project.ext.build.xtend_gradle)
       classpath 'com.android.databinding:dataBinder:1.+'
     }
-  repositories {
-    jcenter()
-  }
 }
 
 apply plugin: 'com.android.application'
@@ -63,4 +60,3 @@ android {
     }
   }
 }
-apply plugin: 'org.xtend.xtend-android'
