@@ -16,37 +16,30 @@ import org.xtendroid.content.res.AndroidResources
 @Accessors
 class Quote
 {
-   String quote
-   String by
+    String quote
 }
 
-@AndroidActivity(R.layout.main) class QuotesActivity extends Activity {
+@AndroidActivity(layout=R.layout.main) class QuotesActivity extends Activity {
 
-   val quote = new Quote
+    val quote = new Quote
 
-   @AndroidResources(type=R.string)
-   var Strings strings
+    // broken because R.string doesn't even exist yet
+    @AndroidResources(type=R.string, path='res/values/strings.xml')
+    var Strings strings
 
-   override onCreate(Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState)
-      var binding = DataBindingUtil.setContentView(this, R.layout.main)
-      quote.by = "Buggaboo"
-      quote.quote = "duhh..."
+    override onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState)
+        var binding = DataBindingUtil.setContentView(this, R.layout.main)
+        quote.quote = "duhh..."
 
-      // Use auto-generated class
-      /*
-      var b = binding as QuotesActivityBinding
-      b.quote = quote;
-      */
-}
-   
-   /**
-    * Type safe callback
-    */
-   override void nextQuote(View v) {
-      // update model
-      quote.by = strings.quotes.get(0)
-      quote.quote = strings.quotes.get(0)
-   }
-   
+        // Use auto-generated class
+        var b = binding as QuotesActivityBinding
+        b.quote = quote
+    }
+
+    override void nextQuote(View v) {
+        // update model
+        quote.quote = strings.quotes.get(0)
+    }
+
 }
