@@ -9,67 +9,44 @@ import android.app.Activity
 import android.os.Bundle
 import android.widget.Toast
 import android.view.Gravity
+import android.databinding.DataBindingUtil
+import org.eclipse.xtend.lib.annotations.Accessors
+import org.xtendroid.content.res.AndroidResources
 
-import static extension com.example.quotes.UiBuilder.*
+@Accessors
+class Quote
+{
+   String quote
+   String by
+}
 
-@AndroidActivity(R.layout.main) class QuotesActivity {
+@AndroidActivity(R.layout.main) class QuotesActivity extends Activity {
+
+   val quote = new Quote
+
+   @AndroidResources(type=R.string)
+   var Strings strings
+
+   override onCreate(Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState)
+      var binding = DataBindingUtil.setContentView(this, R.layout.main)
+      quote.by = "Buggaboo"
+      quote.quote = "duhh..."
+
+      // Use auto-generated class
+      /*
+      var b = binding as QuotesActivityBinding
+      b.quote = quote;
+      */
+}
    
    /**
     * Type safe callback
     */
-   override void sayHello(View v) {
-      messageView.text = "Hello Android from Xtend!"
+   override void nextQuote(View v) {
+      // update model
+      quote.by = strings.quotes.get(0)
+      quote.quote = strings.quotes.get(0)
    }
    
 }
-/*
-class HelloWorldActivity_2 extends Activity {
-   
-
-   override protected void onCreate(Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState)
-      
-      val button = new Button(this)
-      button.text = "Say Hello!"
-      button.onClickListener = [ 
-         Toast.makeText(context, "Hello Android from Xtend!", Toast.LENGTH_LONG).show
-      ]
-      
-      val layout = new LinearLayout(this)
-      layout.gravity = Gravity.CENTER
-      layout.addView(button)
-      contentView = layout
-   }
-}
-
-class HelloWorldActivity_3 extends Activity {
-
-
-   override protected void onCreate(Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState)
-
-      contentView = linearLayout [
-         gravity = Gravity.CENTER
-         addView( button [
-            text = "Say Hello!"
-            onClickListener = [
-               Toast.makeText(context, "Hello Android from Xtend!", Toast.LENGTH_LONG).show
-            ]
-         ])
-      ]
-   }
-}
-
-*/
-
-class UiBuilder {
-
-   def static LinearLayout linearLayout(Context it, (LinearLayout)=>void initializer) {
-      new LinearLayout(it) => initializer
-   }
-   
-   def static Button button(Context it, (Button)=>void initializer) {
-      new Button(it) => initializer
-   }
-   
-} 
