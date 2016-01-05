@@ -1,17 +1,16 @@
 package com.example.quotes
 
-import android.content.Context
+import java.util.Random
 import android.view.View
-import android.widget.Button
-import android.widget.LinearLayout
 import org.xtendroid.app.AndroidActivity
 import android.app.Activity
 import android.os.Bundle
-import android.widget.Toast
-import android.view.Gravity
 import android.databinding.DataBindingUtil
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.xtendroid.content.res.AndroidResources
+
+// xtend can't find my generated MainActivityBinding
+//import com.example.quotes.databinding.MainActivityBinding
 
 @Accessors
 class Quote
@@ -19,9 +18,11 @@ class Quote
     String quote
 }
 
-@AndroidActivity(layout=R.layout.main) class QuotesActivity extends Activity {
+@AndroidActivity(layout=R.layout.main_activity) class QuotesActivity extends Activity {
 
     val quote = new Quote
+
+    val rng = new Random();
 
     // broken because R.string doesn't even exist yet
     @AndroidResources(type=R.string, path='res/values/strings.xml')
@@ -29,17 +30,18 @@ class Quote
 
     override onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState)
-        var binding = DataBindingUtil.setContentView(this, R.layout.main)
-        quote.quote = "duhh..."
+        // xtend can't find my generated MainActivityBinding
+        var binding = DataBindingUtil.setContentView(this, R.layout.main_activity) // as MainActivityBinding
 
         // Use auto-generated class
-        var b = binding as QuotesActivityBinding
-        b.quote = quote
+        //binding.quote = quote
     }
 
     override void nextQuote(View v) {
         // update model
-        quote.quote = strings.quotes.get(0)
+        val i = rng.nextInt(strings.quotes.length)
+        quote.quote = strings.quotes.get(i)
+        // quoteView.text = strings.quotes.get(i) // android data binding is a roundabout way to do this
     }
 
 }
