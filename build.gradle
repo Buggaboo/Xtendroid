@@ -3,11 +3,11 @@ buildscript {scriptHandler->
     apply from: 'dependencies.gradle'
     dependencies {
         classpath(project.ext.build.xtend_android_gradle)
-        classpath(project.ext.build.xtend_gradle)
+        classpath(project.ext.build.xtext_gradle)
     }
 }
 
-apply plugin: 'org.xtend.xtend'
+apply plugin: 'org.xtext.xtend'
 
 dependencies {
   compile ':Xtendroid'
