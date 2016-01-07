@@ -11,8 +11,8 @@ ext {
     build = [
         android_gradle : "com.android.tools.build:gradle:${android_gradle_ver}",
         xtend_android_gradle : "org.xtext:xtext-android-gradle-plugin:${xtend_android_gradle_ver}",
-        xtend_gradle : "org.xtend:xtend-gradle-plugin:${xtend_gradle_ver}",
-        xtext_gradle : "org.xtext:xtext-gradle-plugin:${xtext_gradle_ver}" // doesn't play well with android (01-2016)
+        xtend_gradle : "org.xtend:xtend-gradle-plugin:${xtend_gradle_ver}", // will be deprecated
+        xtext_gradle : "org.xtext:xtext-gradle-plugin:${xtext_gradle_ver}"
     ]
 
     xtend_lib_ver = '2.9.+'
