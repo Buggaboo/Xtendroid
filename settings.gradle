@@ -13,8 +13,10 @@ project(':HandlerExample').projectDir = new File(settingsDir, './examples/Handle
 include ':MovieSearchApp'
 project(':MovieSearchApp').projectDir = new File(settingsDir, './examples/MovieSearchApp')
 
+/*
 include ':Quotes'
 project(':Quotes').projectDir = new File(settingsDir, './examples/Quotes')
+*/
 
 include(':XtendroidTest')
 project(':XtendroidTest').projectDir = new File(settingsDir, './XtendroidTest/')
