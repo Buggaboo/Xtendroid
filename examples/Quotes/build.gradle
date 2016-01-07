@@ -4,14 +4,11 @@ buildscript {scriptHandler->
     dependencies {
       classpath(project.ext.build.xtend_android_gradle)
       classpath(project.ext.build.xtend_gradle)
-      classpath(project.ext.build.android_gradle) // binding is not also supported >1.5?
-//      classpath 'com.android.tools.build:gradle:1.5.+'
-      //classpath 'com.android.databinding:dataBinder:1.+' // not necessary with android-gradle 1.5.0-beta1
+      classpath(project.ext.build.android_gradle) // binding is supported >1.5
     }
 }
 
 apply plugin: 'com.android.application'
-//apply plugin: 'com.android.databinding' // not necessary with android-gradle 1.5.0-beta1
 apply plugin: 'org.xtext.android.xtend'
 apply from: '../../dependencies.gradle'
 
@@ -31,7 +28,9 @@ android {
   compileSdkVersion(project.ext.compileSdkVersion)
   buildToolsVersion(project.ext.buildToolsVersion)
 
-  // android gradle >1.5 also supports binding (sometime in the future)?
+  defaultConfig.applicationId 'com.example.quotes'
+
+  // android gradle >1.5 supports binding
   dataBinding {
     enabled = true
   }

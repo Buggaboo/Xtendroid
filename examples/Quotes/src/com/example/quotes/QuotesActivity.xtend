@@ -10,7 +10,7 @@ import org.eclipse.xtend.lib.annotations.Accessors
 import org.xtendroid.content.res.AndroidResources
 
 // xtend can't find my generated MainActivityBinding
-//import com.example.quotes.databinding.MainActivityBinding
+import com.example.quotes.databinding.MainActivityBinding
 
 @Accessors
 class Quote
@@ -22,7 +22,7 @@ class Quote
 
     val quote = new Quote
 
-    val rng = new Random();
+    val rng = new Random()
 
     // broken because R.string doesn't even exist yet
     @AndroidResources(type=R.string, path='res/values/strings.xml')
@@ -31,7 +31,7 @@ class Quote
     override onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState)
         // xtend can't find my generated MainActivityBinding
-        var binding = DataBindingUtil.setContentView(this, R.layout.main_activity) // as MainActivityBinding
+        var binding = DataBindingUtil.setContentView(this, R.layout.main_activity) as MainActivityBinding
 
         // Use auto-generated class
         //binding.quote = quote
