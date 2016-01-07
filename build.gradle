@@ -16,5 +16,5 @@ dependencies {
   compile project(':HelloWorld')
   compile project(':HandlerExample')
   compile project(':MovieSearchApp')
-/*  compile project(':Quotes') */
+  compile project(':Quotes')
 }
