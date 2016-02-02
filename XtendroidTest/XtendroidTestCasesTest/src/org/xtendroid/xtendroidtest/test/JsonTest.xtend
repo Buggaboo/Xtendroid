@@ -177,7 +177,23 @@ class JsonTest extends AndroidTestCase {
 		val format2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 		assertEquals(zuluFormat.scalar.time, format2.parse("2011-11-11T12:34:56.789Z").time)
 		assertEquals(zuluFormat.array.get(0).time, format2.parse("2011-11-11T12:34:56.789Z").time)
-
 	}
+}
 
+@AndroidJson('{
+		"str" : "meh"
+		, "int" : 60
+		, "bool" : true
+	}')
+class BasicJsonized {}
+
+class JsonizedTest extends AndroidTestCase {
+	def testJsonized1 ()
+	{
+		new BasicJsonized(new JSONObject('{
+			"str" : "something"
+			, "int" : 666
+			, "bool" : false
+		}'))
+	}
 }

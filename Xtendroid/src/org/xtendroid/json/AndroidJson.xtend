@@ -15,9 +15,20 @@ import org.eclipse.xtend.lib.macro.declaration.Visibility
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import android.util.JsonReader
 import org.eclipse.xtend.lib.macro.declaration.MutableMemberDeclaration
 import org.eclipse.xtend.lib.macro.TransformationParticipant
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
+import java.io.InputStream
+import java.io.ByteArrayInputStream
+import java.io.Reader
+import java.io.StringReader
+import android.util.JsonToken
+
+import static extension org.xtendroid.utils.NamingUtils.*
+import org.eclipse.xtend.lib.macro.RegisterGlobalsParticipant
+import org.eclipse.xtend.lib.macro.RegisterGlobalsContext
+import org.eclipse.xtend.lib.macro.declaration.ClassDeclaration
 
 @Active(AndroidJsonProcessor)
 @Target(value=#[ElementType.FIELD, ElementType.TYPE])
@@ -34,7 +45,7 @@ annotation AndroidJson {
  * and then parses it on-demand with getters.
  * 
  */
-class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDeclaration> {
+class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDeclaration>, RegisterGlobalsParticipant {
 
 	// types supported by JSONObject
 	val static supportedTypes = #{
@@ -62,11 +73,154 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 		elements.forEach[e| e.transform(context) ]
 	}
 
+	def static void parseJsonObject(JSONObject jsonObj, MutableClassDeclaration clazz, extension TransformationContext context)
+	{
+		val stringReader = new StringReader(jsonObj.toString.trim)
+		val reader = new JsonReader(stringReader) // necessary to close the reader?
+
+		reader.beginObject // consume '{'
+
+        clazz.addConstructor [
+            addParameter ('jsonObject', JSONObject.newTypeReference)
+            body = '''
+                this.jsonObject = jsonObject;
+                this.dirtyFlag = false; // all values come from the json object
+            '''
+        ]
+
+        clazz.addField ('jsonObject') [
+            type = JSONObject.newTypeReference
+            final = false
+            visibility = Visibility.PROTECTED
+        ]
+
+        // TODO replace dirty flag all or nothing system, with per field dirty flag (do we really need that?)
+		while (reader.hasNext)
+		{
+            val originalKey = reader.nextName
+			val key = originalKey.toJavaIdentifier
+			val peekValueType = reader.peek
+//            val peekValue = reader.next
+			switch peekValueType
+			{
+				case JsonToken.BOOLEAN: {
+					// make a field for booleans
+					clazz.addField(key) [
+						type = Boolean.newTypeReference
+						final = false
+						visibility = Visibility.PROTECTED
+					]
+
+					clazz.addMethod("get" + key.toFirstUpper) [
+						returnType = Boolean.newTypeReference
+						visibility = Visibility.PUBLIC
+						body = '''
+						    if (!dirtyFlag)
+						    {
+						        this.«key» = jsonObject.getBoolean("«originalKey»");
+						    }
+							return this.«key»;
+						'''
+					]
+
+					clazz.addMethod("set" + key.toFirstUpper) [
+						addParameter('b', Boolean.newTypeReference)
+						visibility = Visibility.PUBLIC
+						body = '''
+						    this.dirtyFlag = true; // the values were modified
+							this.«key» = b;
+						'''
+					]
+				}
+
+                // TODO there are two types, doubles (e.g. [0-9]*.[0-9]*) and longs (e.g. [0-9]*)
+				case JsonToken.NUMBER: {
+					// make a field for numbers
+					clazz.addField(key) [
+						type = /* if(reader.nextLong..Double) Double.newTypeReference else*/ Long.newTypeReference
+						final = false
+						visibility = Visibility.PROTECTED
+					]
+
+					clazz.addMethod("get" + key.toFirstUpper) [
+						returnType = Long.newTypeReference
+						visibility = Visibility.PUBLIC
+						body = '''
+							return «key»;
+						'''
+					]
+
+					clazz.addMethod("set" + key.toFirstUpper) [
+						addParameter('l', Long.newTypeReference)
+						visibility = Visibility.PUBLIC
+						body = '''
+						    this.dirtyFlag = true;
+							this.«key» = l;
+						'''
+					]
+				}
+				case JsonToken.STRING: {
+					// make a field for strings
+					clazz.addField(key) [
+						type = String.newTypeReference
+						final = false
+						visibility = Visibility.PROTECTED
+					]
+
+					clazz.addMethod("get" + key.toFirstUpper) [
+						returnType = String.newTypeReference
+						visibility = Visibility.PUBLIC
+						body = '''
+						    if (!dirtyFlag)
+						    {
+						        this.«key» = jsonObject.getString(«key»);
+						    }
+							return «key»;
+						'''
+					]
+
+					clazz.addMethod("set" + key.toFirstUpper) [
+						addParameter('s', String.newTypeReference)
+						visibility = Visibility.PUBLIC
+						body = '''
+						    this.dirtyFlag = true;
+							this.«key» = s;
+						'''
+					]
+				}
+/*
+				// TODO register new classes at the beginning recursively
+				case JsonToken.BEGIN_OBJECT:
+					...
+
+				// TODO register new classes at the beginning recursively
+				// TODO put the values in a List at the initial read
+				case JsonToken.BEGIN_ARRAY:
+					...
+*/
+			}
+		}
+		reader.endObject
+		stringReader.close
+		reader.close
+	}
+
 	def dispatch void transform(MutableClassDeclaration it, extension TransformationContext context) {
-		it.declaredFields.forEach[f| 
-			if (f.visibility == Visibility.PRIVATE && f.annotations.empty) 
-				f.doTransform(context)		
-		]
+		val annotationValue = (it.findAnnotation(AndroidJson.findTypeGlobally)?.getValue('value') as String).trim
+
+		if (annotationValue.startsWith('[')) {
+            it.addWarning('JSONArray detected')
+			parseJsonObject(new JSONArray(annotationValue).getJSONObject(0), it, context)
+        }else if (annotationValue.startsWith('{'))
+        {
+            it.addWarning('JSONObject detected')
+            parseJsonObject(new JSONObject(annotationValue), it, context)
+        } else {
+			it.declaredFields.forEach[
+				if (visibility == Visibility.PRIVATE && annotations.empty)
+					doTransform(context)
+			]
+		}
 	}
 
 	def dispatch void transform(MutableFieldDeclaration it, extension TransformationContext context) {
@@ -102,7 +256,8 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 		// attempt to use the explicitly stated JSON member key, if stated
 		val annotationValue = field.findAnnotation(AndroidJson.findTypeGlobally)?.getValue('value') as String
 
-		val jsonKey = if (!annotationValue.nullOrEmpty && !(field.type.name.startsWith("java.util.Date") ||
+		// override field name with a provided name
+		val jsonKey = if (!annotationValue.nullOrEmpty && !(field.type.equals(Date.newTypeReference) ||
 				(field.type.equals(List.newTypeReference()) &&
 					field.type.actualTypeArguments.head.equals(Date.newTypeReference()))
       ))
@@ -279,6 +434,20 @@ class AndroidJsonProcessor implements TransformationParticipant<MutableMemberDec
 			}
 		]
 	}
+
+	override doRegisterGlobals(List list, RegisterGlobalsContext registerGlobalsContext) {
+
+		for (m : list)
+		{
+			try {
+                // apply only on class declarations
+                val c = m as ClassDeclaration
+                // TODO read annotation json recursively, create the classes required
+			} catch (ClassCastException ex) { /* continue */ }
+		}
+
+	}
+
 }
 
 class ThreadLocalDateFormatter extends ThreadLocal<DateFormat> {

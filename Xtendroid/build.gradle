@@ -18,6 +18,12 @@ apply from: '../dependencies.gradle'
 dependencies {
     compile(project.ext.lib.android.support_v4)
     compile(project.ext.lib.android.appcompat_v7)
+//    compile 'org.json:json:20151123'
+    /*
+    {
+        exclude group: 'org.json'
+    }
+    */
     compile(project.ext.lib.xtend)
 }
 
