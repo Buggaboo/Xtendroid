@@ -38,7 +38,7 @@ android {
   sourceSets {
     main {
       manifest { srcFile 'AndroidManifest.xml' }
-      java.srcDirs = ['src']
+      java.srcDirs = ['src'/*, 'build/intermediates/classes/debug'*/ ]
       res.srcDirs = ['res']
       assets.srcDirs = ['assets']
       resources.srcDirs += ['src']
@@ -62,3 +62,31 @@ android {
     }
   }
 }
+
+// Shit circular dependency!
+project.afterEvaluate {
+  android.applicationVariants.all { variant ->
+
+    // force ordering on the tasks
+    def variantName = variant.name.capitalize()
+    tasks["generate${variantName}Xtext"].mustRunAfter /*dependsOn*/ tasks["generate${variantName}Sources"] //tasks["compile${variantName}JavaWithJavac"]
+
+    // add srcDir, depending on the variant
+    def sourceDir = "${buildDir}/generated/source/xtend/${variant.dirName}"
+    variant.addJavaSourceFoldersToModel new File(sourceDir)
+  }
+}
+
+// Debugging!
+project.tasks.whenTaskAdded { task ->
+  doLast {
+    println task.name
+    println file("build/intermediates/classes/debug/com/example/quotes/databinding/MainActivityBinding.java").exists()
+    println file("build/intermediates/classes/debug/com/android/databinding/library/baseAdapters/BR.java").exists()
+    println file("build/intermediates/classes/debug/com/example/quotes/BR.java").exists()
+    println file("build/intermediates/classes/release/com/example/quotes/databinding/MainActivityBinding.java").exists()
+    println file("build/intermediates/classes/release/com/android/databinding/library/baseAdapters/BR.java").exists()
+    println file("build/intermediates/classes/release/com/example/quotes/BR.java").exists()
+  }
+}
+

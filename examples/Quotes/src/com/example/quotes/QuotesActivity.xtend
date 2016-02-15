@@ -10,7 +10,8 @@ import org.eclipse.xtend.lib.annotations.Accessors
 import org.xtendroid.content.res.AndroidResources
 
 // xtend can't find my generated MainActivityBinding
-import com.example.quotes.databinding.MainActivityBinding
+// TODO activate
+//import com.example.quotes.databinding.MainActivityBinding
 
 @Accessors
 class Quote
@@ -31,9 +32,11 @@ class Quote
     override onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState)
         // xtend can't find my generated MainActivityBinding
-        var binding = DataBindingUtil.setContentView(this, R.layout.main_activity) as MainActivityBinding
+        // TODO activate
+        //var binding = DataBindingUtil.setContentView(this, R.layout.main_activity) as MainActivityBinding
 
         // Use auto-generated class
+        // TODO activate
         //binding.quote = quote
     }
 
