@@ -11,7 +11,7 @@ import org.xtendroid.content.res.AndroidResources
 
 // xtend can't find my generated MainActivityBinding
 // TODO activate
-//import com.example.quotes.databinding.MainActivityBinding
+import com.example.quotes.databinding.MainActivityBinding
 
 @Accessors
 class Quote

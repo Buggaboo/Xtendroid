@@ -79,15 +79,30 @@ project.afterEvaluate {
 }
 */
 
-// Debugging!
-project.tasks.whenTaskAdded { task ->
-  doLast {
-    FileTree tree = fileTree(dir: 'build/intermediates/classes', include: '**/*.java')
-    tree.each {File file ->
-        if (file.name.endsWith('Binding.java') || file.name.equals('BR.java')) {
-            println task.toString() + ':' + file.toString()
+// Clone a task, then run it to break the cyclic dependency
+project.afterEvaluate {
+    android.applicationVariants.all { variant ->
+        def variantName = variant.name.capitalize()
+        project.tasks.create(name: "preProcess${variantName}DataBinding", /*dependsOn: "process${variantName}Resources",*/ type: org.gradle.api.tasks.compile.JavaCompile) {
+            println 'Attempting to generate data binding classes and compile them first'
+            mustRunAfter "process${variantName}Resources"
+            dependsOn "process${variantName}Resources"
         }
     }
-  }
 }
+
+
+/*
+// Debugging!
+project.tasks.whenTaskAdded { task ->
+    doLast {
+        FileTree tree = fileTree(dir: 'build/intermediates/classes', include: '** /*.java') // TODO to activate stick the * / together
+        tree.each {File file ->
+            if (file.name.endsWith('Binding.java') || file.name.equals('BR.java')) {
+                println task.toString() + ':' + file.toString()
+            }
+        }
+    }
+}
+*/
 
